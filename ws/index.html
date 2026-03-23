@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="ws.js"> </script>
+</head>
+<body>
+    <h1>ID</h1>
+    <input type="text" id="messageInput" placeholder="Message" />
+    <input type="text" id="idInput" placeholder="Target ID" />
+    <button onclick="sendMessage()">Send Message</button>
+    <ul id="messages"></ul>
+
+    <div style="border: 1px solid black;position: absolute; top: 20px; right: 5%;">
+        <h1>Online</h1>
+        <ul id="IDs">
+        </ul>
+    </div>
+
+
+    <script>
+        
+
+        // const socket = new WebSocket('ws://192.168.65.19:8081');
+
+        // socket.addEventListener('open', event => {
+        //     logMessage('Connected to the server');
+        // });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+* {
+    font-family: monospace;
+}
+
+#history {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+#history > div {
+    border-bottom: 1px solid;
+    padding: 5px 10px;
+    max-width: 100vw;
+    max-height: 50px;
+    overflow: auto;
+    transition: .05s;
+    animation: showMessage .05s linear;
+}
+
+#history > div.history-mine {
+    background-color: aliceblue;
+}
+
+#history > div.history-log {
+    color: gray;
+}
+
+@keyframes showMessage {
+    from {
+        max-height: 0px;
+        padding: 0px 10px;
+    } to {
+        max-height: 50px;
+        padding: 5px 10px;
+    }
+}
