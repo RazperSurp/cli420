@@ -1,9 +1,11 @@
-window.socket = connect();
+
 window.WS_AUTH = JSON.parse(window.localStorage.getItem('ws_auth')) ?? {};
 
+window.socket = connect();
 window.socket.onopen = e => {
+    window._audioFiles.socket.connected.play();
     appendToHistory('websocket connected', true)
-    document.querySelector('#socket-status > u').innerText = 'online';
+    document.querySelector('#socket-status').innerText = 'online';
 };
 
 window.socket.onmessage = e => {
@@ -13,7 +15,7 @@ window.socket.onmessage = e => {
         case 'AUTH': 
             auth(input.data); 
             break;
-        case 'AUTH_SUCCESS': 
+        case 'AUTH_SUCCESS':
             document.querySelector('#client-id').innerText = input.data.id; 
             appendToHistory(`recieved id ${input.data.id}`, true); 
             break;
@@ -22,8 +24,9 @@ window.socket.onmessage = e => {
             break;
         case 'MESSAGE_LOG':
         case 'MESSAGE_CHAT': 
-            let messageBlock = createMessageBlock({ style: { color: input.data.color ?? '#000000' }, text: `${input.data.from}@${input.data.to}` }, { text: `: ${input.data.text}` }); 
+            let messageBlock = createMessageBlock({ style: { color: input.data.color ?? 'inherit' }, text: `${input.data.from}@${input.data.to}` }, { text: `: ${input.data.text}` }); 
             appendToHistory(messageBlock, input.type == 'MESSAGE_LOG');
+            if (input.type == 'MESSAGE_CHAT') window._audioFiles.message.got.play();
             break;
         case 'USERS': 
             actualizeAddresses(input.data); 
@@ -34,8 +37,9 @@ window.socket.onmessage = e => {
 };
 
 window.socket.onclose = e => {
-    appendToHistory('websocket connection closed. reconnecting', true)
-    document.querySelector('#socket-status > u').innerText = 'offline';
+    appendToHistory('websocket connection closed. reconnecting', true);
+    window._audioFiles.socket.disconnected.play();
+    document.querySelector('#socket-status').innerText = 'offline';
     window.socket = connect();
 }
 
@@ -47,6 +51,7 @@ window.socket.onerror = e => {
 function connect() {
     return new WebSocket(`ws://26.44.196.200:8082`);
     // return new WebSocket(`ws://192.168.65.116:8082`);
+    // return new WebSocket(`ws://192.168.56.1:8082`);
     // return new WebSocket(`ws://192.168.62.87:8082`);
     // return new WebSocket(`ws://127.0.0.1:8082`);
     // return new WebSocket(`ws://${window.location.host}:8082`);
@@ -71,6 +76,7 @@ function actualizeAddresses(data) {
         if (user.action == 'LEAVE' && option) {
             option.remove();
             
+            window._audioFiles.user.left.play();
             appendToHistory(`${user.text} disconnected`, true);
         } else if (user.action == 'JOIN' || user.action == 'ACTUALIZING') {
             if (!option) {
@@ -80,7 +86,10 @@ function actualizeAddresses(data) {
 
                 usersSelect.appendChild(option);
 
-                if (user.action == 'JOIN') appendToHistory(`${user.text} connected`, true);
+                if (user.action == 'JOIN') {
+                    window._audioFiles.user.join.play();
+                    appendToHistory(`${user.text} connected`, true);
+                }
             }
         }
 
@@ -113,6 +122,8 @@ function updateWSAuth(data) {
     window.WS_AUTH = Object.assign(JSON.parse(window.localStorage.getItem('ws_auth')) ?? {}, data);
     window.localStorage.setItem('ws_auth', JSON.stringify(window.WS_AUTH));
 
+    if (window.WS_AUTH.name !== null) document.querySelector('#name').innerText = window.WS_AUTH.name;
+
     for (const [key, value] of Object.entries(data)) {
         appendToHistory(`WS_AUTH: ${key} changed to ${value}`, true);
     }
@@ -140,6 +151,7 @@ function appendToHistory(text, isLog, isMine = false) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.WS_AUTH.name !== null) document.querySelector('#name').innerText = window.WS_AUTH.name ?? 'anonymous';
     document.forms.send.onsubmit = e => {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -154,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: fd
                 }));
             } else {
-                let messageBlock = createMessageBlock({ style: { color: window.WS_AUTH.color ?? '#000000' }, text: `${window.WS_AUTH.name ?? 'you'}@${fd.to}: ` }, { text: fd.text });
+                let messageBlock = createMessageBlock({ style: { color: window.WS_AUTH.color ?? 'inherit' }, text: `${window.WS_AUTH.name ?? 'you'}@${fd.to}: ` }, { text: fd.text });
 
                 appendToHistory(messageBlock, false, true);
                 window.socket.send(JSON.stringify({
@@ -163,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }));
             }
 
+            window._audioFiles.message.sent.play();
             e.currentTarget.querySelector('input').value = '';
         }
 

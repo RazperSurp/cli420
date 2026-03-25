@@ -13,6 +13,10 @@ export class SocketClientTable {
         return SocketClientTable.socketClients.find(socketClient => socketClient.id === Number(id));
     }
 
+    static findByName(name) {
+        return SocketClientTable.socketClients.find(socketClient => socketClient.name === name);
+    }
+
     static push(socket) {
         let socketClient = new SocketClient(SocketClientTable.nextId, socket);
         SocketClientTable.socketClients.push(socketClient);

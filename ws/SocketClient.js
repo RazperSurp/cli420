@@ -8,6 +8,7 @@ export class SocketClient {
     _activities = [];
 
     color;
+    banned = false;
 
     get nextSocketId() { return this._socketIdGeneratorInstance.next().value; }
 
@@ -42,7 +43,9 @@ export class SocketClient {
     }
 
     destroySocket(id) {
+        this.sockets.find(socket => socket.id === id)?.terminate();
         this.sockets = this._sockets.filter(socket => socket.id !== id);
+
         if (this.isBusy) this._activities.forEach(activity => {
             activity.sendDisconnectNotify(this);
         })
@@ -51,6 +54,11 @@ export class SocketClient {
     * _socketIdGenerator() {
         let id = 1;
         while (true) yield id++;
+    }
+
+    terminate() {
+        this.send({ text: 'тебя забанили на сервере бешенные псы 18+ майнкрафт турбо реалми' });
+        this.sockets.forEach(socket => { this.destroySocket(socket.id) });
     }
 
     send(data, type = 'MESSAGE_CHAT') {

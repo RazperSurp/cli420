@@ -1,5 +1,34 @@
+:root {
+    --accent-color: #27e927;
+    --accent-color-a50: #27e92780;
+    --accent-bgclr: #132613;
+    --accent-bgclr-a50: #13261380;
+    --second-color: #497449;
+}
+
 * {
     font-family: monospace;
+    color: var(--accent-color);
+}
+
+body {
+    background-color: black;
+    border: 1px solid;
+    border-radius: 10px;
+    padding: 10px;
+    background-image: linear-gradient(180deg, #ffffff0d 25%, transparent 25%, transparent 50%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    animation: progress-bar-stripes 5s linear infinite;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 10px;
+    box-shadow: inset 0px 0px 15px 10px var(--accent-color-a50);
+}
+
+body > main {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 #history {
@@ -8,7 +37,7 @@
 }
 
 #history > div {
-    border-bottom: 1px solid;
+    /* border-bottom: 1px solid; */
     padding: 5px 10px;
     max-width: 100vw;
     max-height: 50px;
@@ -18,11 +47,61 @@
 }
 
 #history > div.history-mine {
-    background-color: aliceblue;
+    background-color: var(--accent-bgclr-a50);
 }
 
-#history > div.history-log {
-    color: gray;
+#history > div.history-log * {
+    color: var(--second-color);
+}
+
+#debug-info {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid;
+    flex-direction: row;
+}
+
+#debug-info span {
+    text-decoration: underline;
+    font-weight: 700;
+}
+
+#cli-input {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#cli-input input {
+    width: 100%;
+    background: transparent;
+    border: unset;
+    outline: unset !important;
+}
+
+#history--wrapper {
+    max-height: 90%;
+    overflow-y: auto;
+}
+
+#send {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+#send button {
+    width: 0px;
+    height: 0px;
+    opacity: 0;
+}
+
+#screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes showMessage {
@@ -32,5 +111,13 @@
     } to {
         max-height: 50px;
         padding: 5px 10px;
+    }
+}
+
+@keyframes progress-bar-stripes {
+    from {
+        background-position-y: 0px;
+    } to {
+        background-position-y: -200px;
     }
 }

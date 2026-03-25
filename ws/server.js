@@ -66,6 +66,8 @@ function authClient(client, data) {
 
     client.authorized = true;
 
+    if (socketClient.banned) socketClient.terminate();
+
     if (socketClient.sockets.length == 1) {
         SocketClientTable.massSend({ 
             users: [{
@@ -89,20 +91,22 @@ function authClient(client, data) {
 }
 
 function sendChatMessage(sender, data) {
-    let reciever = server.SocketClientTable.findById(data.to);
-    let words = data.text.split(' ');
-    let parsedInput = [];
+    if (sender != null) {
+        let reciever = server.SocketClientTable.findById(data.to);
+        let words = data.text.split(' ');
+        let parsedInput = [];
 
-    words.forEach(word => {
-        if (word.length > 80) parsedInput = parsedInput.concat(word.match(/.{1,80}/g));
-        else parsedInput.push(word);
-    });
+        words.forEach(word => {
+            if (word.length > 80) parsedInput = parsedInput.concat(word.match(/.{1,80}/g));
+            else parsedInput.push(word);
+        });
 
-    data.text = parsedInput.join(' ');
+        data.text = parsedInput.join(' ');
 
-    if (data.to == 'all') server.SocketClientTable.massSend({ to: data.to, from: sender.name ?? sender.id, color: sender.color, text: data.text }, 'MESSAGE_CHAT', [sender.id]);
-    else if (reciever) reciever.send({ to: data.to, from: sender.name ?? sender.id, color: sender.color, text: data.text });
-    else sender.send({ from: 'OS', text: 'user not found' }, 'MESSAGE_LOG');
+        if (data.to == 'all') server.SocketClientTable.massSend({ to: data.to, from: sender.name ?? sender.id, color: sender.color, text: data.text }, 'MESSAGE_CHAT', [sender.id]);
+        else if (reciever) reciever.send({ to: data.to, from: sender.name ?? sender.id, color: sender.color, text: data.text });
+        else sender.send({ from: 'OS', text: 'user not found' }, 'MESSAGE_LOG');
+    }
 }
 
 function parseCommand(sender, data) {
@@ -123,6 +127,12 @@ function parseCommand(sender, data) {
                 sender.send({ color: `#${hexColor}` }, 'WS_AUTH_UPDATE');
             }
             break;
+        case '/ban':
+            let user = server.SocketClientTable.findByName(args[0]);
+            if (user) {
+                user.banned = true;
+                user.terminate();
+            } break;
         case '/online': 
             sender.send({ from: 'OS', text: `Users online: ${server.SocketClientTable.socketClients.filter(socketClient => socketClient.alive).map(socketClient => { return socketClient.name }).join(', ')}` }, 'MESSAGE_LOG');
 
@@ -134,12 +144,14 @@ function parseCommand(sender, data) {
 
 function heartbeat() {
     console.log('new pulse');
-    console.log(server.SocketClientTable.socketClients.map(socketClient => { return [socketClient.alive, socketClient.name, socketClient._sockets] }))
+    console.log(server.SocketClientTable.socketClients.map(socketClient => { return [socketClient.alive, socketClient.name, socketClient.banned, socketClient._sockets] }))
     server.SocketClientTable.socketClients.forEach(socketClient => {
         socketClient.sockets.forEach(socket => {
             if (!socket.alive || !socket.authorized) {
+                console.log(socketClient);
+
                 socket.terminate();
-                socketClient.destroyConnection(socket.id);
+                socketClient.destroySocket(socket.id);
             }
             else {
                 socket.alive = false;
