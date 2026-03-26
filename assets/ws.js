@@ -49,11 +49,11 @@ window.socket.onerror = e => {
 }
 
 function connect() {
-    return new WebSocket(`ws://26.44.196.200:8082`);
+    // return new WebSocket(`ws://26.44.196.200:8082`);
     // return new WebSocket(`ws://192.168.65.116:8082`);
     // return new WebSocket(`ws://192.168.56.1:8082`);
     // return new WebSocket(`ws://192.168.62.87:8082`);
-    // return new WebSocket(`ws://127.0.0.1:8082`);
+    return new WebSocket(`ws://127.0.0.1:8082`);
     // return new WebSocket(`ws://${window.location.host}:8082`);
 }
 
