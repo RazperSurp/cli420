@@ -17,7 +17,7 @@ server.on('connection', client => {
         }
     });
     
-    client.send(JSON.stringify({ type: 'AUTH', data: { token: client.token } }));
+    client.send(JSON.stringify({ type: 'WS_AUTH', data: { token: client.token } }));
 
     client.on('message', e => { parseMessage(e, client) });
     client.on('pong', e => { client.alive = true; });
@@ -46,11 +46,13 @@ function parseMessage(e, client) {
     let input = JSON.parse(e.toString()),
         sender = client.socketClient();
 
-    switch (input.type) {
-        case 'AUTH': authClient(client, input.data); break;
-        case 'MESSAGE_CHAT': sendChatMessage(sender, input.data); break;
-        case 'MESSAGE_COMMAND': parseCommand(sender, input.data); break;
-        default: break; 
+    if (sender !== null) {
+        switch (input.type) {
+            case 'WS_AUTH': authClient(client, input.data); break;
+            case 'MESSAGE_CHAT': sendChatMessage(sender, input.data); break;
+            case 'MESSAGE_COMMAND': parseCommand(sender, input.data); break;
+            default: break; 
+        }
     }
 }
 
@@ -87,7 +89,7 @@ function authClient(client, data) {
     }).filter(client => client);
 
     socketClient.send({ users: usersOnline }, 'USERS');
-    socketClient.send({ id: socketClient.id }, 'AUTH_SUCCESS');
+    socketClient.send({ id: socketClient.id }, 'WS_AUTH_SUCCESS');
 }
 
 function sendChatMessage(sender, data) {
