@@ -2,8 +2,7 @@
 
 <head></head>
     <title> tictactoe </title>
-    <script src="./assets/main.js"> </script>
-    <script src="./assets/ws.js"> </script>
+    <script type="module" src="./assets/js/main.mjs"> </script>
     <link rel="stylesheet" href="./assets/main.css">
 </head>
 <body>

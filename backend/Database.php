@@ -19,7 +19,7 @@ class Database {
         "host" => "192.168.65.19",
         "port" => "5432",
         "user" => "prod",
-        "password" => ''
+        "password" => '148841'
     ];
 
     public function __construct() {

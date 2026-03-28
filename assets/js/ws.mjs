@@ -1,4 +1,4 @@
-import { COMMANDS } from '../../ws/commands.mjs'; 
+import * as COMMANDS from '../../ws/commands.mjs'; 
 
 export class SocketClient {
     _socket;
