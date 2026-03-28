@@ -1,6 +1,6 @@
-import { COMMANDS } from '../ws/commands.mjs'; 
+import { COMMANDS } from '../../ws/commands.mjs'; 
 
-class SocketClient {
+export class SocketClient {
     _socket;
     _id;
     _token;
@@ -85,46 +85,46 @@ class SocketClient {
     }
 
     socketOnOpen(event) {
-        window._socketClient._appendToHistory('websocket connected', { isLog: true, sender: { module: 'SOCKET' } }); 
+        window._OS.socketClient._appendToHistory('websocket connected', { isLog: true, sender: { module: 'SOCKET' } }); 
         window._audioFiles.socket.connected.play();
 
-        window._socketClient.containers.status.innerText = 'online';
+        window._OS.socketClient.containers.status.innerText = 'online';
     }
 
     socketOnClose(event) {
-        window._socketClient._appendToHistory('websocket connection closed. reconnecting', { isLog: true, sender: { module: 'SOCKET' } });
+        window._OS.socketClient._appendToHistory('websocket connection closed. reconnecting', { isLog: true, sender: { module: 'SOCKET' } });
         window._audioFiles.socket.disconnected.play();
 
-        window._socketClient.containers.status.innerText = 'offline';
+        window._OS.socketClient.containers.status.innerText = 'offline';
     }
 
     socketOnError(event) {
-        window._socketClient._appendToHistory('websocket connection error!', { isLog: true, sender: { module: 'SOCKET' } });
+        window._OS.socketClient._appendToHistory('websocket connection error!', { isLog: true, sender: { module: 'SOCKET' } });
         console.error(event);
         
-        window._socketClient.socketOnClose(event);
+        window._OS.socketClient.socketOnClose(event);
     }
     
     socketOnMessage(event) {
         let input = JSON.parse(event.data);
 
         switch (input.type) {
-            case 'WS_AUTH': window._socketClient.auth(input.data); break;
-            case 'WS_AUTH_SUCCESS': window._socketClient.id = input.data.id; break;
+            case 'WS_AUTH': window._OS.socketClient.auth(input.data); break;
+            case 'WS_AUTH_SUCCESS': window._OS.socketClient.id = input.data.id; break;
             case 'WS_AUTH_UPDATE': 
-                for (const [key, value] of Object.entries(input.data)) window._socketClient.updateWSAuth(key, value); 
+                for (const [key, value] of Object.entries(input.data)) window._OS.socketClient.updateWSAuth(key, value); 
                 break;
-            case 'USERS': window._socketClient.actualizeAddresses(input.data); break;
+            case 'USERS': window._OS.socketClient.actualizeAddresses(input.data); break;
             case 'MESSAGE_LOG':
             case 'MESSAGE_CHAT': 
                 let messageBlock = createMessageBlock({ style: { color: input.data.color ?? 'inherit' }, text: `${input.data.from}@${input.data.to}` }, { text: `: ${input.data.text}` }); 
-                window._socketClient._appendToHistory(messageBlock, input.type == 'MESSAGE_LOG');
+                window._OS.socketClient._appendToHistory(messageBlock, input.type == 'MESSAGE_LOG');
                 if (input.type == 'MESSAGE_CHAT') window._audioFiles.message.got.play();
                 break;
             case 'PROCESS_LOCK':
             case 'PROCESS_UNLOCK': 
                 // let messageBlock = createMessageBlock({ style: { color: input.data.color ?? 'inherit' }, text: `${input.data.from}@${input.data.to}` }, { text: `: ${input.data.text}` }); 
-                // window._socketClient._appendToHistory(messageBlock, input.type == 'MESSAGE_LOG');
+                // window._OS.socketClient._appendToHistory(messageBlock, input.type == 'MESSAGE_LOG');
                 // if (input.type == 'MESSAGE_CHAT') window._audioFiles.message.got.play();
                 break;
             default: break;
@@ -149,14 +149,14 @@ class SocketClient {
             if (user.action == 'LEAVE') {
                 window._audioFiles.user.left.play();
 
-                window._socketClient._onlineUsers = window._socketClient._onlineUsers.filter(contact => contact.id !== user.id);
-                window._socketClient._appendToHistory(`${user.text} disconnected`, { isLog: true, sender: { module: 'CLIENTS' } });
+                window._OS.socketClient._onlineUsers = window._OS.socketClient._onlineUsers.filter(contact => contact.id !== user.id);
+                window._OS.socketClient._appendToHistory(`${user.text} disconnected`, { isLog: true, sender: { module: 'CLIENTS' } });
             } else if (user.action == 'JOIN' || user.action == 'ACTUALIZING') {
-                window._socketClient._onlineUsers.push(user);
+                window._OS.socketClient._onlineUsers.push(user);
 
                 if (user.action == 'JOIN') {
                     window._audioFiles.user.join.play();
-                    window._socketClient._appendToHistory(`${user.text} connected`, { isLog: true, sender: { module: 'CLIENTS' } });
+                    window._OS.socketClient._appendToHistory(`${user.text} connected`, { isLog: true, sender: { module: 'CLIENTS' } });
                 }
             }
         }
@@ -182,16 +182,16 @@ class SocketClient {
 
         if (fd.text.trim() != '') {
             if (fd.text.startsWith('/')) { // 1
-                window._socketClient._appendToHistory(`you called ${fd.text}`, true);
-                window._socketClient._socket.send(JSON.stringify({
+                window._OS.socketClient._appendToHistory(`you called ${fd.text}`, true);
+                window._OS.socketClient._socket.send(JSON.stringify({
                     type: 'MESSAGE_COMMAND',
                     data: fd
                 }));
             } else {
-                let messageBlock = createMessageBlock({ style: { color: window._socketClient.color ?? 'inherit' }, text: `${window._socketClient.name ?? 'you'}@${fd.to}: ` }, { text: fd.text });
+                let messageBlock = createMessageBlock({ style: { color: window._OS.socketClient.color ?? 'inherit' }, text: `${window._OS.socketClient.name ?? 'you'}@${fd.to}: ` }, { text: fd.text });
 
-                window._socketClient._appendToHistory(messageBlock, false, true);
-                window._socketClient._socket.send(JSON.stringify({
+                window._OS.socketClient._appendToHistory(messageBlock, false, true);
+                window._OS.socketClient._socket.send(JSON.stringify({
                     type: 'MESSAGE_CHAT',
                     data: fd
                 }));
@@ -247,44 +247,8 @@ class SocketClient {
     }
 
     static connect() {
-        window._socketClient = new SocketClient();
+        window._OS.socketClient = new SocketClient();
     }
 }
 
-SocketClient.connect();
 
-
-function createMessageBlock(...messages) {
-    let span, spans = [];
-    messages.forEach(message => {
-        span = document.createElement('span');
-
-        if (message.style !== null && message.style !== undefined && Object.keys(message.style).length > 0) {
-            for (const [key, value] of Object.entries(message.style)) {
-                span.style[key] = value;
-            }
-        }
-
-        span.innerText = message.text;
-
-        spans.push(span);
-    })
-
-    return spans;
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.forms.send.onsubmit = e => {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-
-        let fd = {};
-        (new FormData(e.currentTarget)).forEach((value, key) => {  fd[key] = typeof value == 'string' ? value.trim() : value });
-
-        window._socketClient.parseInput(fd);
-        e.currentTarget.querySelector('input[name="text"]').value = '';
-
-        return false;
-    }
-})

@@ -19,6 +19,13 @@ abstract class BaseCollection {
         $this->$name = &$this->items[$name];
     }
 
+    public function stringify() {
+        $stringifiedItems = []; 
+        foreach($this->_items as $item) $stringifiedItems[] = $item->stringify();
+
+        return $stringifiedItems;
+    }
+
     public function has($key) { return isset($this->items[$key]); }
 }
 
