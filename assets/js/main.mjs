@@ -1,6 +1,5 @@
-import { OS } from './os.mjs';
-
-
+// import { OS } from './os.mjs';
+console.log('привет');
 function createMessageBlock(...messages) {
     let span, spans = [];
     messages.forEach(message => {
@@ -36,4 +35,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 })
 
-window._OS = new OS(); 
+// window._OS = new OS(); 

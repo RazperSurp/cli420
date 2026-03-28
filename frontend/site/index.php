@@ -2,7 +2,8 @@
 
 <head></head>
     <title> tictactoe </title>
-    <script type="module" src="./assets/js/main.mjs"> </script>
+    <script src="./assets/js/main.mjs"> </script>
+    <script src="../../assets/ws.js"> </script>
     <link rel="stylesheet" href="./assets/main.css">
 </head>
 <body>
@@ -12,20 +13,27 @@
             <div> id: <span id="client-id"> -1 </span> </div>
         </div>
         <div id="screen">
-            <form id="send">
-                <select name="to" hidden>
-                    <option value="all" selected> - </option>
-                </select>
-                <div id="cli-input">
-                    <div> 
-                        <span id="name">anonymous</span><span>@</span><span id="channel">all</span><span>></span>
+            <nav id="navigation-container">
+
+            </nav>
+            <div id="work-space">
+                <div id="console">
+                    <form id="send">
+                        <select name="to" hidden>
+                            <option value="all" selected> - </option>
+                        </select>
+                        <div id="cli-input">
+                            <div> 
+                                <span id="name">anonymous</span><span>@</span><span id="channel">all</span><span>></span>
+                            </div>
+                            <input name="text" type="text">
+                        </div>
+                        <button type="submit"> send </button>
+                    </form>
+                    <div id="history--wrapper">
+                        <div id="history"> </div>
                     </div>
-                    <input name="text" type="text">
                 </div>
-                <button type="submit"> send </button>
-            </form>
-            <div id="history--wrapper">
-                <div id="history"> </div>
             </div>
         </div>
     </main>

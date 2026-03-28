@@ -4,6 +4,7 @@
     --accent-bgclr: #132613;
     --accent-bgclr-a50: #13261380;
     --second-color: #497449;
+    --accent-color-a37: #27e9275d;
 }
 
 * {
@@ -101,7 +102,6 @@ body > main {
 #screen {
     height: 100%;
     display: flex;
-    flex-direction: column;
 }
 
 @keyframes showMessage {
@@ -120,4 +120,29 @@ body > main {
     } to {
         background-position-y: -200px;
     }
+}
+#navigation-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 100px;
+    padding: 20px;
+    border-radius: 10px;
+    border-right: 3px solid var(--accent-color-a37);
+}
+#work-space {
+    display: flex;
+    flex-direction: column;
+    padding-left: 20px;
+}
+#console {
+    min-width: 300px;
+    min-height: 100px;
+    border-radius: 10px;
+    border: 2px solid var(--accent-bgclr);
+    background-color: black;
+    background-image: linear-gradient(180deg, #ffffff0d 25%, transparent 25%, transparent 50%, transparent 75%, transparent);
+    background-size: 25px 25px;
+    animation: progress-bar-stripes 5s linear infinite;
+    padding: 20px;
 }
