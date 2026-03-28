@@ -2,7 +2,8 @@
 
 class Controller {
     public function render() {
-        $file = $_SERVER['DOCUMENT_ROOT'] .'/frontend/'. K420::$request->router. '/'. K420::$request->view .'.php';
+        $root = $_SERVER['SCRIPT_NAME'] == '/cli420/index.php' ? '/cli420' : '';
+        $file = $_SERVER['DOCUMENT_ROOT']. $root .'/frontend/'. K420::$request->router. '/'. K420::$request->view .'.php';
 
         if (is_file($file)) {
             require($file);
