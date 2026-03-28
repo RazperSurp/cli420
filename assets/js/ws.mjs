@@ -25,30 +25,6 @@ export class SocketClient {
         return this._name;
     }
 
-    get homePath() {
-        return `/home/user/${this.name}`;
-    }
-
-    get path() {
-        return this._path == this.homePath ? `~` : this._path;
-    }
-
-    get containers() {
-        if (!this._containers) {
-            this._containers = {
-                id: document.querySelector('#debug-info #id'),
-                color: document.querySelector('#debug-info #color'),
-                status: document.querySelector('#debug-info #status'),
-                token: document.querySelector('#debug-info #token'),
-                name: document.querySelector('#cli-input #name'),
-                path: document.querySelector('#cli-input #path'),
-                history: document.querySelector('#history')
-            }
-        }
-
-        return this._containers;
-    }
-
     get process() {
         return this._process;
     }
@@ -62,7 +38,6 @@ export class SocketClient {
     set token(value) { this.updateWSAuth('token', value); }
     set color(value) { this.updateWSAuth('color', value); }
     set name(value) { this.updateWSAuth('name', value); }
-    set path(value) { this.updateWSAuth('path', value); }
 
 
     constructor() {
@@ -71,8 +46,6 @@ export class SocketClient {
         this._socket.onclose = this.socketOnClose;
         this._socket.onerror = this.socketOnError;
         this._socket.onmessage = this.socketOnMessage;
-
-        this.name 
     }
 
     auth(data) {
@@ -206,8 +179,6 @@ export class SocketClient {
 
     }
 
-    
-
     _appendToHistory(text, params = {}) {
         let historyRow = document.createElement('div');
         historyRow.classList.add('history-row');
@@ -247,7 +218,7 @@ export class SocketClient {
     }
 
     static connect() {
-        window._OS.socketClient = new SocketClient();
+        return new SocketClient();
     }
 }
 
