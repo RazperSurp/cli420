@@ -10,7 +10,7 @@ ini_set('log_errors', '1'); // Log errors (optional, but good practice)
 <head>
     <title> tictactoe </title>
     <script src="./assets/main.js"> </script>
-    <script src="./assets/ws.js"> </script>
+    <script type="module" src="./assets/ws.mjs"> </script>
     <link rel="stylesheet" href="./assets/main.css">
 </head>
 <body>

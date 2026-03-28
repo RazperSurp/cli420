@@ -1,3 +1,5 @@
+import { COMMANDS } from '../ws/commands.mjs'; 
+
 class SocketClient {
     _socket;
     _id;
@@ -5,9 +7,8 @@ class SocketClient {
     _name;
     _color;
     _path;
-
+    _process = null;
     _containers;
-
     _onlineUsers = [];
 
     get WS_AUTH() {
@@ -48,11 +49,21 @@ class SocketClient {
         return this._containers;
     }
 
+    get process() {
+        return this._process;
+    }
+
+    set process(value) {
+        this._appendToHistory(value === null ? `locking process removed` : `locking process changed to ${value.text} (use ctrl+c to exit)`, { isLog: true, sender: { module: 'LOCKER' } });
+        this._process = value;
+    }
+
     set id(value) { this.updateWSAuth('id', value); }
     set token(value) { this.updateWSAuth('token', value); }
     set color(value) { this.updateWSAuth('color', value); }
     set name(value) { this.updateWSAuth('name', value); }
     set path(value) { this.updateWSAuth('path', value); }
+
 
     constructor() {
         this._socket = new WebSocket(`ws://${window.location.host}:8082`);
@@ -85,7 +96,6 @@ class SocketClient {
         window._audioFiles.socket.disconnected.play();
 
         window._socketClient.containers.status.innerText = 'offline';
-        // window.socket = connect();
     }
 
     socketOnError(event) {
@@ -111,8 +121,18 @@ class SocketClient {
                 window._socketClient._appendToHistory(messageBlock, input.type == 'MESSAGE_LOG');
                 if (input.type == 'MESSAGE_CHAT') window._audioFiles.message.got.play();
                 break;
+            case 'PROCESS_LOCK':
+            case 'PROCESS_UNLOCK': 
+                // let messageBlock = createMessageBlock({ style: { color: input.data.color ?? 'inherit' }, text: `${input.data.from}@${input.data.to}` }, { text: `: ${input.data.text}` }); 
+                // window._socketClient._appendToHistory(messageBlock, input.type == 'MESSAGE_LOG');
+                // if (input.type == 'MESSAGE_CHAT') window._audioFiles.message.got.play();
+                break;
             default: break;
         }
+    }
+
+    socketSend(message) {
+        this._socket.send(JSON.stringify(message));
     }
 
     updateWSAuth(key, value) {
@@ -143,6 +163,50 @@ class SocketClient {
         
         data.users.forEach(update);   
     }
+
+    parseInput(formData) {
+        let body = { type: 'OS_COMMAND', data: formData }
+        
+        if (body.data.text) {
+            if (this.process == null) {
+                if (body.data.text.startsWith('/')) body = this._parseChatCommand(body);
+                else body = this._parseSystemCommand(body);
+            } else { 
+                console.log(123);
+            }
+        }
+
+
+
+        // if (fd.text.trim() != '') parseInput(fd);
+
+        if (fd.text.trim() != '') {
+            if (fd.text.startsWith('/')) { // 1
+                window._socketClient._appendToHistory(`you called ${fd.text}`, true);
+                window._socketClient._socket.send(JSON.stringify({
+                    type: 'MESSAGE_COMMAND',
+                    data: fd
+                }));
+            } else {
+                let messageBlock = createMessageBlock({ style: { color: window._socketClient.color ?? 'inherit' }, text: `${window._socketClient.name ?? 'you'}@${fd.to}: ` }, { text: fd.text });
+
+                window._socketClient._appendToHistory(messageBlock, false, true);
+                window._socketClient._socket.send(JSON.stringify({
+                    type: 'MESSAGE_CHAT',
+                    data: fd
+                }));
+            }
+
+            window._audioFiles.message.sent.play();
+            e.currentTarget.querySelector('input').value = '';
+        }
+    }
+
+    _parseChatCommand() {
+
+    }
+
+    
 
     _appendToHistory(text, params = {}) {
         let historyRow = document.createElement('div');
@@ -187,7 +251,6 @@ class SocketClient {
     }
 }
 
-
 SocketClient.connect();
 
 
@@ -217,30 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopImmediatePropagation();
 
         let fd = {};
-        (new FormData(e.currentTarget)).forEach((value, key) => { fd[key] = value; })
+        (new FormData(e.currentTarget)).forEach((value, key) => {  fd[key] = typeof value == 'string' ? value.trim() : value });
 
-        // if (fd.text.trim() != '') parseInput(fd);
-
-        if (fd.text.trim() != '') {
-            if (fd.text.startsWith('/')) { // 1
-                window._socketClient._appendToHistory(`you called ${fd.text}`, true);
-                window._socketClient._socket.send(JSON.stringify({
-                    type: 'MESSAGE_COMMAND',
-                    data: fd
-                }));
-            } else {
-                let messageBlock = createMessageBlock({ style: { color: window._socketClient.color ?? 'inherit' }, text: `${window._socketClient.name ?? 'you'}@${fd.to}: ` }, { text: fd.text });
-
-                window._socketClient._appendToHistory(messageBlock, false, true);
-                window._socketClient._socket.send(JSON.stringify({
-                    type: 'MESSAGE_CHAT',
-                    data: fd
-                }));
-            }
-
-            window._audioFiles.message.sent.play();
-            e.currentTarget.querySelector('input').value = '';
-        }
+        window._socketClient.parseInput(fd);
+        e.currentTarget.querySelector('input[name="text"]').value = '';
 
         return false;
     }
