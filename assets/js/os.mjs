@@ -1,43 +1,26 @@
 import { SocketClient } from './ws.mjs';
 
 export class OS {
-    static AUDIO = {
-        user: {
-            join: {
-                src: '/assets/audio/user-join.wav',
-                play: function () { (new Audio(this.src)).play() }
-            }, 
-            left: {
-                src: '/assets/audio/user-leave.wav',
-                play: function () { (new Audio(this.src)).play() }
-            }
-        }, 
-        message: {
-            got: {
-                src: '/assets/audio/message-got.wav',
-                play: function () { (new Audio(this.src)).play() }
-            }, 
-            sent: {
-                src: '/assets/audio/message-sent.wav',
-                play: function () { (new Audio(this.src)).play() }
-            }
-        }, 
-                play: function () { (new Audio(this.src)).play() }
-            }, 
-            disconnected: {
-                src: '/assets/audio/socket-disconnected.wav',
-                play: function () { (new Audio(this.src)).play() }
-            }
-        },
-        _lib: {
-            socketConnected: '/assets/audio/socket-connected.wav',
-        }, 
-        play: (name) => {
-
-        }
+    static get App() {
+        return window._OS_INSTANCE;
     }
 
+    static AUDIO = {
+        _lib: {
+            socketConnected: 'socket-connected.wav',
+            socketDisconnected: 'socket-disconnected.wav',
+            messageGot: 'message-got.wav',
+            messageSent: 'message-sent.wav',
+            userJoin: 'user-join.wav',
+            userLeft: 'user-leave.wav'
+        }, play: (name) => { return new Audio(`/assets/audio/${this.AUDIO._lib[name]}`).play(); }
+    }
 }
 
 
-SocketClient.connect();
+// SocketClient.connect();
+
+window.OS = OS;
+window._OS_INSTANCE = new OS();
+
+OS.AUDIO.play('socketConnected');

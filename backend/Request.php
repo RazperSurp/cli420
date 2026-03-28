@@ -21,14 +21,13 @@ class Request {
         $this->_headersCollection = new HeadersCollection(getallheaders());
         $this->_cookiesCollection = new CookiesCollection($_COOKIE);
 
-        
-        $this->_parseScriptPath($this->get['script']);
+        $this->_parseScriptPath($this->get['script'] ?? '');
     }
 
     private function _parseScriptPath($script) {
         $path = explode('/', $script);
-
         $pathLength = count($path);
+
         if ($path[0] !== 'api') {
             switch ($pathLength) {
                 case 0:
@@ -37,7 +36,7 @@ class Request {
                     break;
                 case 1:
                     $this->_router = 'site';
-                    $this->_view = $path[0];
+                    $this->_view = $path[0] ? $path[0] :'index';
                     break;
                 default:
                     $this->_router = $path[0];
@@ -45,7 +44,7 @@ class Request {
                     break;
             }
         } else {
-            $this->_isApi = true;
+            $this->isApi = true;
             $path = array_slice($path, 1, 2);
 
             switch ($pathLength) {
@@ -55,7 +54,7 @@ class Request {
                     break;
                 case 1:
                     $this->_router = 'site';
-                    $this->_view = $path[0];
+                    $this->_view = $path[0] ? $path[0] :'index';
                     break;
                 default:
                     $this->_router = $path[0];
