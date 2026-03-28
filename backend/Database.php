@@ -16,6 +16,10 @@ class Database {
     public static $connection;
 
     private const CREDENTIALS = [
+        "host" => "192.168.65.19",
+        "port" => "5432",
+        "user" => "prod",
+        "password" => ''
     ];
 
     public function __construct() {

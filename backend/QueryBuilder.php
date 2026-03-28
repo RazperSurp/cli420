@@ -41,13 +41,13 @@ class QueryBuilder {
         return $this->_rawSql;
     }
 
-    public function one():RecordManager {
+    public function one():null|RecordManager {
         $this->_execute();
 
         return $this->_parse(true);
     }
 
-    public function all():array {
+    public function all():null|array {
         $this->_execute();
 
         return $this->_parse(false);
@@ -61,7 +61,7 @@ class QueryBuilder {
         return $this->_resource;
     }
 
-    private function _parse(bool $getOne = true): array|RecordManager {
+    private function _parse(bool $getOne = true): array|null|RecordManager {
         while ($row = pg_fetch_assoc($this->_resource)) {
             if ($getOne) $this->_response = new RecordManager($row, $row['id'], $this->_tableName);
             else $this->_response[] = new RecordManager($row, $row['id'], $this->_tableName);
